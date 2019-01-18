@@ -102,7 +102,7 @@ go(function () {
 
     for ($i = 0; $i < 2; $i++) {
         go(function () use ($mysql, $chan) {
-//            $mysql->insert("insert into table_1(name, age) value ('hello', 28)");
+            $mysql->insert("insert into table_1(name, age) value ('hello', 28)");
             $data = $mysql->master('show databases');
 
             $chan->push($data);

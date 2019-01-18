@@ -23,7 +23,7 @@ class Item implements ItemInterface
     /**
      * @var float
      */
-    protected $timeout = 3;
+    protected $timeout = 2;
 
     /**
      * Item
@@ -32,10 +32,6 @@ class Item implements ItemInterface
      */
     public function __construct(array $config)
     {
-        if (isset($config['size'])) {
-            $this->size = $config['size'];
-        }
-
         $this->config   = $config;
         $this->resource = new MySQL;
 
@@ -96,18 +92,26 @@ class Item implements ItemInterface
         // 执行查询
         $result = $this->resource->query($sql, $timeout);
 
-        // 查询结果为false，自动重连
-        if ($result == false && !$this->isConnect()) {
+        // 查询结果为false
+        if ($result == false) {
 
-            // 重新连接
-            $this->connect();
-
+            // 连接断开，重新连接
             if (!$this->isConnect()) {
-                throw new Exception('Connection close by peer(' . $this->resource->error . ')', $this->resource->errno);
-            }
 
-            // 重新执行当前 sql
-            $result = $this->resource->query($sql, $timeout);
+                // 重新连接
+                $this->connect();
+                // 重新连接失败
+                if (!$this->isConnect()) {
+                    throw new Exception('Connection close by peer(' . $this->resource->error . ')', $this->resource->errno);
+                }
+
+                // 重新执行当前 sql
+                $result = $this->resource->query($sql, $timeout);
+            }
+            // SQL 执行超时
+            elseif ($this->resource->errno == 110) {
+                throw new Exception('SQL execution timeout', $this->resource->errno);
+            }
         }
 
         return $result;
