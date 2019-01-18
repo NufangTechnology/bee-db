@@ -1,0 +1,22 @@
+{
+    "name": "bee-framework/db",
+    "description": "Bee框架数据库组件",
+    "type": "library",
+    "require": {
+        "bee-framework/util": "^2.0"
+    },
+    "require-dev": {
+        "swoft/swoole-ide-helper": "^4.2"
+    },
+    "authors": [
+        {
+            "name": "沸羊羊",
+            "email": "anoxia@engineer.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Bee\\Db\\": "src/"
+        }
+    }
+}
