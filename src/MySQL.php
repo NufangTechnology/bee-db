@@ -9,42 +9,8 @@ use Bee\Db\MySQL\Item;
  *
  * @package Bee\Db
  */
-class MySQL
+class MySQL extends Layer
 {
-    /**
-     * @var Pool
-     */
-    private $masterPool;
-
-    /**
-     * @var Pool
-     */
-    private $slavePool;
-
-    /**
-     * MySQL constructor.
-     *
-     * @param array $config
-     */
-    public function __construct(array $config)
-    {
-        // 如果存在主节点配置，初始化
-        if (isset($config['master'])) {
-            $this->initMasterPool($config['master']);
-        }
-
-        // 如果存在从节点配置，初始化
-        if (isset($config['slave'])) {
-            $this->initSlavePool($config['slave']);
-        }
-
-        // 如果只存在一个配置，主从各创建
-        if (isset($config['host'])) {
-            $this->initMasterPool($config);
-            $this->initSlavePool($config);
-        }
-    }
-
     /**
      * 初始化主节点连接池
      *
@@ -131,7 +97,6 @@ class MySQL
         $item   = $this->masterPool->get();
         // 执行数据库业务
         $result = $this->send($sql, $item, $timeout);
-
         // 业务处理结束，连接放回连接池
         $this->masterPool->put($item);
 
@@ -152,7 +117,6 @@ class MySQL
         $item   = $this->slavePool->get();
         // 执行数据库业务
         $result = $this->send($sql, $item, $timeout);
-
         // 业务处理结束，连接放回连接池
         $this->masterPool->put($item);
 

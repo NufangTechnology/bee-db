@@ -1,6 +1,7 @@
 <?php
 namespace Bee\Db\MySQL;
 
+use Bee\Db\ItemInterface;
 use Swoole\Coroutine\MySQL;
 
 /**
@@ -34,9 +35,6 @@ class Item implements ItemInterface
     {
         $this->config   = $config;
         $this->resource = new MySQL;
-
-        // 执行连接
-        $this->connect();
     }
 
     /**
@@ -47,20 +45,6 @@ class Item implements ItemInterface
     public function connect()
     {
         return $this->resource->connect($this->config);
-    }
-
-    /**
-     * 数据库重连
-     *
-     * @return bool
-     */
-    public function reconnect()
-    {
-        if (!$this->isConnect()) {
-            return $this->connect();
-        }
-
-        return true;
     }
 
     /**
@@ -96,7 +80,7 @@ class Item implements ItemInterface
             $this->connect();
             // 重新连接失败
             if (!$this->isConnect()) {
-                throw new Exception('Connection close by peer(' . $this->resource->error . ')', $this->resource->errno);
+                throw new Exception('Connection close by peer(' . $this->resource->connect_error . ')', $this->resource->errno);
             }
         }
 

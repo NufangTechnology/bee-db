@@ -1,13 +1,14 @@
 <?php
-namespace Bee\Db\MySQL;
+namespace Bee\Db\Redis;
 
 use Bee\Db\PoolInterface;
 use Swoole\Coroutine\Channel;
+use Swoole\Coroutine\Redis;
 
 /**
- * MySQL 连接池
+ * Redis 连接池
  *
- * @package Bee\Db\MySQL
+ * @package Bee\Db\Redis
  */
 class Pool implements PoolInterface
 {
@@ -43,10 +44,10 @@ class Pool implements PoolInterface
     }
 
     /**
-     * @return Item
+     * @return Redis
      * @throws Exception
      */
-    public function get() : Item
+    public function get()
     {
         $item = $this->pool->pop($this->timeout);
 
