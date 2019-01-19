@@ -32,11 +32,6 @@ class Item implements ItemInterface
     protected $resource;
 
     /**
-     * @var float
-     */
-    protected $timeout = 1;
-
-    /**
      * Item
      *
      * @param array $config
@@ -46,7 +41,12 @@ class Item implements ItemInterface
         if (isset($config['options'])) {
             $this->options  = $config['options'];
         }
-
+        if (isset($config['host'])) {
+            $this->host = $config['host'];
+        }
+        if (isset($config['port'])) {
+            $this->port = $config['port'];
+        }
 
         $this->resource = new Redis($config);
         // 设置 redis 配置
@@ -57,10 +57,18 @@ class Item implements ItemInterface
      * 连接数据库
      *
      * @return bool
+     * @throws Exception
      */
     public function connect()
     {
-        return $this->resource->connect($this->host, $this->port);
+        $this->resource->connect($this->host, $this->port);
+
+        // 重新连接失败
+        if ($this->resource->connected == false) {
+            throw new Exception('Redis connection close by peer(' . $this->resource->errMsg . ')', $this->resource->errCode);
+        }
+
+        return true;
     }
 
     /**
@@ -79,5 +87,32 @@ class Item implements ItemInterface
     public function close()
     {
         return $this->resource->close();
+    }
+
+    /**
+     * @return Redis
+     */
+    public function getResource(): Redis
+    {
+        return $this->resource;
+    }
+
+    /**
+     * 动态调用
+     *
+     * @param string $name
+     * @param string $arguments
+     * @return mixed
+     * @throws Exception
+     */
+    public function __call($name, $arguments)
+    {
+        // 检测数据库是否已连接
+        // 如果未连接，尝试进行连接
+        if (!$this->isConnect()) {
+            $this->connect();
+        }
+
+        return call_user_func_array([$this->resource, $name], $arguments);
     }
 }

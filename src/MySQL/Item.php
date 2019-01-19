@@ -41,10 +41,18 @@ class Item implements ItemInterface
      * 连接数据库
      *
      * @return bool
+     * @throws Exception
      */
     public function connect()
     {
-        return $this->resource->connect($this->config);
+        $this->resource->connect($this->config);
+
+        // 重新连接失败
+        if ($this->resource->connected == false) {
+            throw new Exception('MySQL connection close by peer(' . $this->resource->connect_error . ')', $this->resource->errno);
+        }
+
+        return true;
     }
 
     /**
@@ -76,12 +84,7 @@ class Item implements ItemInterface
         // 检测数据库是否已连接
         // 如果未连接，尝试进行连接
         if (!$this->isConnect()) {
-            // 重新连接
             $this->connect();
-            // 重新连接失败
-            if (!$this->isConnect()) {
-                throw new Exception('Connection close by peer(' . $this->resource->connect_error . ')', $this->resource->errno);
-            }
         }
 
         // 执行查询

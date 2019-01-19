@@ -4,21 +4,24 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 go(function () {
 
     $config = [
-        'host' => '',
-        'port' => 0,
+        'host' => '192.168.0.254',
+        'port' => 6379,
         'options' => [
             'connect_timeout' => 1,
             'timeout'         => 1,
             'reconnect'       => 3,
-            'password'        => ''
-        ]
+//            'password'        => ''
+        ],
+        'pool_size' => 1,
     ];
 
-    $redis = new \Swoole\Coroutine\Redis();
-    $redis->connect('192.168.0.254', 6379);
-    $redis->set('hello', 'word');
+    $conn = new \Bee\Db\Redis($config);
+    $redis = $conn->getMasterConnect();
+    $redis->set('12345678', 'word');
 
-    $val = $redis->get('hello');
+    $conn->putMasterConnect($redis);
 
-    echo $val;
+    $conn->master(function (\Swoole\Coroutine\Redis $redis) {
+        $redis->set('abcdefg', 'china, china, china');
+    });
 });

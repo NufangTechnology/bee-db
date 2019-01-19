@@ -77,9 +77,10 @@ class Redis extends Layer
     public function master(callable $callback)
     {
         // 取一个连接进行业务操作
+        /** @var Item $item */
         $item = $this->masterPool->get();
         // 执行业务回调
-        $callback($item);
+        $callback($item->getResource());
         // 业务处理结束，连接放回连接池
         $this->masterPool->put($item);
     }
@@ -92,9 +93,10 @@ class Redis extends Layer
     public function slave(callable $callback)
     {
         // 取一个连接进行业务操作
+        /** @var Item $item */
         $item = $this->slavePool->get();
         // 执行业务回调
-        $callback($item);
+        $callback($item->getResource());
         // 业务处理结束，连接放回连接池
         $this->slavePool->put($item);
     }

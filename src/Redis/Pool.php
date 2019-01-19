@@ -3,7 +3,6 @@ namespace Bee\Db\Redis;
 
 use Bee\Db\PoolInterface;
 use Swoole\Coroutine\Channel;
-use Swoole\Coroutine\Redis;
 
 /**
  * Redis 连接池
@@ -44,7 +43,7 @@ class Pool implements PoolInterface
     }
 
     /**
-     * @return Redis
+     * @return \Swoole\Coroutine\Redis
      * @throws Exception
      */
     public function get()
