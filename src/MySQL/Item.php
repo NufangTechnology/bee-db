@@ -89,27 +89,24 @@ class Item implements ItemInterface
             $timeout = $this->timeout;
         }
 
+        // 检测数据库是否已连接
+        // 如果未连接，尝试进行连接
+        if (!$this->isConnect()) {
+            // 重新连接
+            $this->connect();
+            // 重新连接失败
+            if (!$this->isConnect()) {
+                throw new Exception('Connection close by peer(' . $this->resource->error . ')', $this->resource->errno);
+            }
+        }
+
         // 执行查询
         $result = $this->resource->query($sql, $timeout);
 
         // 查询结果为false
         if ($result == false) {
-
-            // 连接断开，重新连接
-            if (!$this->isConnect()) {
-
-                // 重新连接
-                $this->connect();
-                // 重新连接失败
-                if (!$this->isConnect()) {
-                    throw new Exception('Connection close by peer(' . $this->resource->error . ')', $this->resource->errno);
-                }
-
-                // 重新执行当前 sql
-                $result = $this->resource->query($sql, $timeout);
-            }
             // SQL 执行超时
-            elseif ($this->resource->errno == 110) {
+            if ($this->resource->errno == 110) {
                 throw new Exception('SQL execution timeout', $this->resource->errno);
             }
         }
