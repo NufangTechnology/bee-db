@@ -96,6 +96,10 @@ class Item implements ItemInterface
             if ($this->resource->errno == 110) {
                 throw new Exception('SQL execution timeout', $this->resource->errno);
             }
+            // 查询出错
+            elseif ($this->resource->error) {
+                throw new Exception($this->resource->error, $this->resource->errno);
+            }
         }
 
         return $result;
