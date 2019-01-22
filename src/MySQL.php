@@ -118,7 +118,7 @@ class MySQL extends Layer
         // 执行数据库业务
         $result = $this->send($sql, $item, $timeout);
         // 业务处理结束，连接放回连接池
-        $this->masterPool->put($item);
+        $this->slavePool->put($item);
 
         return $result;
     }
