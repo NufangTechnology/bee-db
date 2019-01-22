@@ -78,11 +78,13 @@ class Redis extends Layer
     {
         // 取一个连接进行业务操作
         /** @var Item $item */
-        $item = $this->masterPool->get();
+        $item   = $this->masterPool->get();
         // 执行业务回调
-        $callback($item->getResource());
+        $result = $callback($item->getResource());
         // 业务处理结束，连接放回连接池
         $this->masterPool->put($item);
+
+        return $result;
     }
 
     /**
@@ -94,11 +96,13 @@ class Redis extends Layer
     {
         // 取一个连接进行业务操作
         /** @var Item $item */
-        $item = $this->slavePool->get();
+        $item   = $this->slavePool->get();
         // 执行业务回调
-        $callback($item->getResource());
+        $result = $callback($item->getResource());
         // 业务处理结束，连接放回连接池
         $this->slavePool->put($item);
+
+        return $result;
     }
 
     /**
