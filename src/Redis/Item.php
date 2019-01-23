@@ -22,6 +22,11 @@ class Item implements ItemInterface
     protected $port = 6379;
 
     /**
+     * @var string
+     */
+    protected $password = '';
+
+    /**
      * @var array
      */
     protected $options = [];
@@ -47,6 +52,9 @@ class Item implements ItemInterface
         if (isset($config['port'])) {
             $this->port = $config['port'];
         }
+        if (isset($config['password'])) {
+            $this->password = $config['password'];
+        }
 
         $this->resource = new Redis($config);
         // 设置 redis 配置
@@ -63,6 +71,7 @@ class Item implements ItemInterface
     {
         if (!$this->resource->connected) {
             $this->resource->connect($this->host, $this->port);
+            $this->resource->auth($this->password);
         }
 
         // 重新连接失败
