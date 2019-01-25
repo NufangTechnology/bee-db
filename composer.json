@@ -3,7 +3,9 @@
     "description": "Bee框架数据库组件",
     "type": "library",
     "require": {
-        "bee-framework/util": "^2.0"
+        "bee-framework/util": "^2.0",
+        "ext-redis": "*",
+        "ext-swoole": "*"
     },
     "require-dev": {
         "swoft/swoole-ide-helper": "^4.2"

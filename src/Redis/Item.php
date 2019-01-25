@@ -2,7 +2,6 @@
 namespace Bee\Db\Redis;
 
 use Bee\Db\ItemInterface;
-use Swoole\Coroutine\Redis;
 
 /**
  * Redis 连接实例
@@ -24,15 +23,15 @@ class Item implements ItemInterface
     /**
      * @var string
      */
-    protected $password = '';
+    protected $auth = '';
 
     /**
-     * @var array
+     * @var int
      */
-    protected $options = [];
+    protected $timeout = 2;
 
     /**
-     * @var Redis
+     * @var \Redis
      */
     protected $resource;
 
@@ -43,22 +42,26 @@ class Item implements ItemInterface
      */
     public function __construct(array $config)
     {
-        if (isset($config['options'])) {
-            $this->options  = $config['options'];
-        }
         if (isset($config['host'])) {
             $this->host = $config['host'];
         }
         if (isset($config['port'])) {
             $this->port = $config['port'];
         }
-        if (isset($config['password'])) {
-            $this->password = $config['password'];
+        if (isset($config['auth'])) {
+            $this->auth = $config['auth'];
+        }
+        if (isset($config['timeout'])) {
+            $this->timeout = $config['timeout'];
         }
 
-        $this->resource = new Redis($config);
-        // 设置 redis 配置
-        $this->resource->setOptions($this->options);
+        $this->resource = new \Redis();
+        $this->resource->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_IGBINARY);
+        $this->resource->connect($this->host, $this->port, $this->timeout);
+
+        if ($this->auth) {
+            $this->resource->auth($this->auth);
+        }
     }
 
     /**
@@ -69,27 +72,17 @@ class Item implements ItemInterface
      */
     public function connect()
     {
-        if (!$this->resource->connected) {
-            $this->resource->connect($this->host, $this->port);
-            $this->resource->auth($this->password);
-        }
-
-        // 重新连接失败
-        if ($this->resource->connected == false) {
-            throw new Exception('Redis connection close by peer(' . $this->resource->errMsg . ')', $this->resource->errCode);
-        }
+//        if (!$this->resource->connected) {
+//            $this->resource->connect($this->host, $this->port);
+//            $this->resource->auth($this->password);
+//        }
+//
+//        // 重新连接失败
+//        if ($this->resource->connected == false) {
+//            throw new Exception('Redis connection close by peer(' . $this->resource->errMsg . ')', $this->resource->errCode);
+//        }
 
         return true;
-    }
-
-    /**
-     * 检查数据库是否连接
-     *
-     * @return bool
-     */
-    public function isConnect()
-    {
-        return $this->resource->connected;
     }
 
     /**
@@ -97,13 +90,13 @@ class Item implements ItemInterface
      */
     public function close()
     {
-        return $this->resource->close();
+        $this->resource->close();
     }
 
     /**
-     * @return Redis
+     * @return \Redis
      */
-    public function getResource(): Redis
+    public function getResource(): \Redis
     {
         return $this->resource;
     }
@@ -112,14 +105,14 @@ class Item implements ItemInterface
      * 动态调用
      *
      * @param string $name
-     * @param string $arguments
+     * @param array $arguments
      * @return mixed
-     * @throws Exception
      */
     public function __call($name, $arguments)
     {
+        // FIXME 错误处理
+        $this->resource->ping();
         // 如果未连接，连接数据库
-        $this->connect();
 
         return call_user_func_array([$this->resource, $name], $arguments);
     }
