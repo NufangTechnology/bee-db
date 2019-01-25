@@ -73,32 +73,44 @@ class Redis extends Layer
      * 执行主节点相关业务
      *
      * @param callable $callback
+     * @return string|false
+     * @throws Redis\Exception
      */
     public function master(callable $callback)
     {
         // 取一个连接进行业务操作
         /** @var Item $item */
-        $item = $this->masterPool->get();
+        $item   = $this->masterPool->get();
+        // 连接数据库
+        $item->connect();
         // 执行业务回调
-        $callback($item->getResource());
+        $result = $callback($item->getResource());
         // 业务处理结束，连接放回连接池
         $this->masterPool->put($item);
+
+        return $result;
     }
 
     /**
      * 执行从节点相关业务
      *
      * @param callable $callback
+     * @return string|false
+     * @throws Redis\Exception
      */
     public function slave(callable $callback)
     {
         // 取一个连接进行业务操作
         /** @var Item $item */
-        $item = $this->slavePool->get();
+        $item   = $this->slavePool->get();
+        // 连接数据库
+        $item->connect();
         // 执行业务回调
-        $callback($item->getResource());
+        $result = $callback($item->getResource());
         // 业务处理结束，连接放回连接池
         $this->slavePool->put($item);
+
+        return $result;
     }
 
     /**

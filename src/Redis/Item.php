@@ -22,6 +22,11 @@ class Item implements ItemInterface
     protected $port = 6379;
 
     /**
+     * @var string
+     */
+    protected $password = '';
+
+    /**
      * @var array
      */
     protected $options = [];
@@ -47,6 +52,9 @@ class Item implements ItemInterface
         if (isset($config['port'])) {
             $this->port = $config['port'];
         }
+        if (isset($config['password'])) {
+            $this->password = $config['password'];
+        }
 
         $this->resource = new Redis($config);
         // 设置 redis 配置
@@ -61,7 +69,10 @@ class Item implements ItemInterface
      */
     public function connect()
     {
-        $this->resource->connect($this->host, $this->port);
+        if (!$this->resource->connected) {
+            $this->resource->connect($this->host, $this->port);
+            $this->resource->auth($this->password);
+        }
 
         // 重新连接失败
         if ($this->resource->connected == false) {
@@ -107,11 +118,8 @@ class Item implements ItemInterface
      */
     public function __call($name, $arguments)
     {
-        // 检测数据库是否已连接
-        // 如果未连接，尝试进行连接
-        if (!$this->isConnect()) {
-            $this->connect();
-        }
+        // 如果未连接，连接数据库
+        $this->connect();
 
         return call_user_func_array([$this->resource, $name], $arguments);
     }
