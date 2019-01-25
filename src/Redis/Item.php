@@ -56,7 +56,6 @@ class Item implements ItemInterface
         }
 
         $this->resource = new \Redis();
-        $this->resource->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_IGBINARY);
         $this->resource->connect($this->host, $this->port, $this->timeout);
 
         if ($this->auth) {
