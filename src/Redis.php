@@ -81,22 +81,25 @@ class Redis extends Layer
         // 取一个连接进行业务操作
         /** @var Item $item */
         $item   = $this->masterPool->get();
-        //
+        // 获取 redis 连接对象
         $source = $item->getResource();
 
+        //检查服务器连接情况
         try {
-            // 连接数据库
             $source->ping();
+        } catch (\Exception $e) {
+            $item->connect();
+        }
 
+        try {
             // 执行业务回调
-            $result = $callback($item->getResource());
-
+            $result = $callback($source);
             // 业务处理结束，连接放回连接池
             $this->masterPool->put($item);
 
             return $result;
         } catch (\Exception $e) {
-            // 业务处理结束，连接放回连接池
+            // 连接放回连接池
             $this->masterPool->put($item);
 
             throw $e;
@@ -115,22 +118,25 @@ class Redis extends Layer
         // 取一个连接进行业务操作
         /** @var Item $item */
         $item   = $this->slavePool->get();
-        //
+        // 获取 redis 连接对象
         $source = $item->getResource();
 
+        //检查服务器连接情况
         try {
-            // 连接数据库
             $source->ping();
+        } catch (\Exception $e) {
+            $item->connect();
+        }
 
+        try {
             // 执行业务回调
-            $result = $callback($item->getResource());
-
+            $result = $callback($source);
             // 业务处理结束，连接放回连接池
             $this->slavePool->put($item);
 
             return $result;
         } catch (\Exception $e) {
-            // 业务处理结束，连接放回连接池
+            // 连接放回连接池
             $this->slavePool->put($item);
 
             throw $e;

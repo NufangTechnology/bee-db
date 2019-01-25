@@ -56,30 +56,20 @@ class Item implements ItemInterface
         }
 
         $this->resource = new \Redis();
-        $this->resource->connect($this->host, $this->port, $this->timeout);
-
-        if ($this->auth) {
-            $this->resource->auth($this->auth);
-        }
     }
 
     /**
      * 连接数据库
      *
      * @return bool
-     * @throws Exception
      */
     public function connect()
     {
-//        if (!$this->resource->connected) {
-//            $this->resource->connect($this->host, $this->port);
-//            $this->resource->auth($this->password);
-//        }
-//
-//        // 重新连接失败
-//        if ($this->resource->connected == false) {
-//            throw new Exception('Redis connection close by peer(' . $this->resource->errMsg . ')', $this->resource->errCode);
-//        }
+        $this->resource->connect($this->host, $this->port, $this->timeout);
+
+        if ($this->auth) {
+            $this->resource->auth($this->auth);
+        }
 
         return true;
     }
@@ -98,21 +88,5 @@ class Item implements ItemInterface
     public function getResource(): \Redis
     {
         return $this->resource;
-    }
-
-    /**
-     * 动态调用
-     *
-     * @param string $name
-     * @param array $arguments
-     * @return mixed
-     */
-    public function __call($name, $arguments)
-    {
-        // FIXME 错误处理
-        $this->resource->ping();
-        // 如果未连接，连接数据库
-
-        return call_user_func_array([$this->resource, $name], $arguments);
     }
 }
