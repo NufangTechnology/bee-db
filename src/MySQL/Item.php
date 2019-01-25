@@ -102,6 +102,11 @@ class Item implements ItemInterface
             }
         }
 
+        // 插入操作时，返回插入记录的 ID
+        if ($this->resource->insert_id) {
+            return $this->resource->insert_id;
+        }
+
         return $result;
     }
 
