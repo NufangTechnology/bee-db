@@ -92,8 +92,14 @@ class Item implements ItemInterface
 
         // 查询结果为false
         if ($result == false) {
-            // SQL 执行超时
-            if ($this->resource->errno == 110) {
+            // 连接断开
+            if ($this->resource->errno == 2006) {
+                $this->connect();
+                // 重新执行
+                $result = $this->resource->query($sql, $timeout);
+            }
+            // 执行超时
+            elseif ($this->resource->errno == 110) {
                 throw new Exception('SQL execution timeout', $this->resource->errno);
             }
             // 查询出错
