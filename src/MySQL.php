@@ -159,7 +159,7 @@ class MySQL extends Layer
      */
     public function update(string $sql, float $timeout = 0)
     {
-        return $this->slave($sql, $timeout);
+        return $this->master($sql, $timeout);
     }
 
     /**
@@ -172,6 +172,6 @@ class MySQL extends Layer
      */
     public function delete(string $sql, float $timeout = 0)
     {
-        return $this->slave($sql, $timeout);
+        return $this->master($sql, $timeout);
     }
 }
