@@ -83,7 +83,7 @@ class Item implements ItemInterface
 
         // 查询结果为false
         // 连接断开
-        if ($stmt == false) {
+        if ($stmt === false) {
             // 短线重连
             if ($this->resource->errno == 2006) {
                 $this->connect();
