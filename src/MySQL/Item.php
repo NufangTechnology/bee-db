@@ -3,6 +3,7 @@ namespace Bee\Db\MySQL;
 
 use Bee\Db\ItemInterface;
 use Swoole\Coroutine\MySQL;
+use Swoole\Coroutine\MySQL\Statement;
 
 /**
  * MySQL 连接实例
@@ -24,7 +25,7 @@ class Item implements ItemInterface
     /**
      * @var float
      */
-    protected $timeout = 1;
+    protected $timeout = 2;
 
     /**
      * Item
@@ -56,26 +57,16 @@ class Item implements ItemInterface
     }
 
     /**
-     * 检查数据库是否连接
-     *
-     * @return bool
-     */
-    public function isConnect()
-    {
-        return $this->resource->connected;
-    }
-
-    /**
      * 执行SQL
      *  - 如果查询结果为false，执行自动重连
-     *  - 自动重连数大于 3 时，抛出异常
      *
      * @param string $sql
+     * @param array $params
      * @param float $timeout
      * @return array
      * @throws Exception
      */
-    public function query(string $sql, float $timeout)
+    public function query(string $sql, array $params, float $timeout)
     {
         if ($timeout == 0) {
             $timeout = $this->timeout;
@@ -83,33 +74,48 @@ class Item implements ItemInterface
 
         // 检测数据库是否已连接
         // 如果未连接，尝试进行连接
-        if (!$this->isConnect()) {
+        if (!$this->resource->connected) {
             $this->connect();
         }
 
-        // 执行查询
-        $result = $this->resource->query($sql, $timeout);
+        // 发送SQL预处理请求
+        $stmt = $this->resource->prepare($sql, $timeout);
 
         // 查询结果为false
-        if ($result == false) {
-            // 连接断开
+        // 连接断开
+        if ($stmt == false) {
+            // 短线重连
             if ($this->resource->errno == 2006) {
                 $this->connect();
-                // 重新执行
-                $result = $this->resource->query($sql, $timeout);
             }
+
+            // 发送SQL预处理请求
+            /** @var MySQL\Statement $stmt */
+            $stmt = $this->resource->prepare($sql, $timeout);
+
+            // 重连失败
+            if ($stmt == false) {
+                throw new Exception('Database reconnect failed;' . $this->resource->error, $this->resource->errno);
+            }
+        }
+
+        // 预处理数据参数
+        $result = $stmt->execute($params, $timeout);
+
+        // 操作失败
+        if ($result === false) {
             // 执行超时
-            elseif ($this->resource->errno == 110) {
-                throw new Exception('SQL execution timeout', $this->resource->errno);
+            if ($this->resource->errno == 110) {
+                throw new Exception('SQL execution timeout: ' . $this->resource->error, $this->resource->errno);
             }
             // 查询出错
             elseif ($this->resource->error) {
-                throw new Exception($this->resource->error, $this->resource->errno);
+                throw new Exception('SQL execute failed: ' . $this->resource->error, $this->resource->errno);
             }
         }
 
         // 插入操作时，返回插入记录的 ID
-        if ($this->resource->insert_id) {
+        if ($stmt->insert_id) {
             return $this->resource->insert_id;
         }
 

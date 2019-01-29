@@ -73,30 +73,32 @@ class MySQL extends Layer
      * 发送待执行 sql
      *
      * @param string $sql
+     * @param array $params
      * @param Item $item
      * @param float $timeout
      * @return array
      * @throws MySQL\Exception
      */
-    protected function send(string $sql, Item $item, float $timeout)
+    protected function send(string $sql, array $params,  Item $item, float $timeout)
     {
-        return $item->query($sql, $timeout);
+        return $item->query($sql, $params, $timeout);
     }
 
     /**
      * 数据库主节点 sql 操作
      *
      * @param string $sql
+     * @param array $params
      * @param float $timeout
      * @return array
      * @throws MySQL\Exception
      */
-    public function master(string $sql, float $timeout = 0)
+    public function master(string $sql, array $params = [], float $timeout = 0)
     {
         // 取一个连接进行业务操作
         $item   = $this->masterPool->get();
         // 执行数据库业务
-        $result = $this->send($sql, $item, $timeout);
+        $result = $this->send($sql, $params, $item, $timeout);
         // 业务处理结束，连接放回连接池
         $this->masterPool->put($item);
 
@@ -107,16 +109,17 @@ class MySQL extends Layer
      * 数据库从节点 sql 操作
      *
      * @param string $sql
+     * @param array $params
      * @param float $timeout
      * @return array
      * @throws MySQL\Exception
      */
-    public function slave(string $sql, float $timeout = 0)
+    public function slave(string $sql, array $params = [], float $timeout = 0)
     {
         // 取一个连接进行业务操作
         $item   = $this->slavePool->get();
         // 执行数据库业务
-        $result = $this->send($sql, $item, $timeout);
+        $result = $this->send($sql, $params, $item, $timeout);
         // 业务处理结束，连接放回连接池
         $this->slavePool->put($item);
 
@@ -127,51 +130,55 @@ class MySQL extends Layer
      * sql 插入操作
      *
      * @param string $sql
+     * @param array $params
      * @param float $timeout
      * @return array
      * @throws MySQL\Exception
      */
-    public function insert(string $sql, float $timeout = 0)
+    public function insert(string $sql, array $params = [], float $timeout = 0)
     {
-        return $this->master($sql, $timeout);
+        return $this->master($sql, $params, $timeout);
     }
 
     /**
      * sql 查询操作
      *
      * @param string $sql
+     * @param array $params
      * @param float $timeout
      * @return array
      * @throws MySQL\Exception
      */
-    public function select(string $sql, float $timeout = 0)
+    public function select(string $sql, array $params = [], float $timeout = 0)
     {
-        return $this->slave($sql, $timeout);
+        return $this->slave($sql, $params, $timeout);
     }
 
     /**
      * sql 更新操作
      *
      * @param string $sql
+     * @param array $params
      * @param float $timeout
      * @return array
      * @throws MySQL\Exception
      */
-    public function update(string $sql, float $timeout = 0)
+    public function update(string $sql, array $params = [], float $timeout = 0)
     {
-        return $this->master($sql, $timeout);
+        return $this->master($sql, $params, $timeout);
     }
 
     /**
      * sql 删除操作
      *
      * @param string $sql
+     * @param array $params
      * @param float $timeout
      * @return array
      * @throws MySQL\Exception
      */
-    public function delete(string $sql, float $timeout = 0)
+    public function delete(string $sql, array $params = [], float $timeout = 0)
     {
-        return $this->master($sql, $timeout);
+        return $this->master($sql, $params, $timeout);
     }
 }
