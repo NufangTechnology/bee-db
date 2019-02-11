@@ -3,7 +3,6 @@ namespace Bee\Db\MySQL;
 
 use Bee\Db\ItemInterface;
 use Swoole\Coroutine\MySQL;
-use Swoole\Coroutine\MySQL\Statement;
 
 /**
  * MySQL 连接实例

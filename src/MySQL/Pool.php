@@ -16,7 +16,7 @@ class Pool implements PoolInterface
      *
      * @var float
      */
-    protected $timeout = 1.5;
+    protected $timeout = 40;
 
     /**
      * @var Channel
