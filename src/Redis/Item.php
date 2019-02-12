@@ -28,7 +28,7 @@ class Item implements ItemInterface
     /**
      * @var int
      */
-    protected $timeout = 10;
+    protected $timeout = 15;
 
     /**
      * @var \Redis

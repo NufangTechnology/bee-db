@@ -24,7 +24,7 @@ class Item implements ItemInterface
     /**
      * @var float
      */
-    protected $timeout = 10;
+    protected $timeout = 15;
 
     /**
      * Item
