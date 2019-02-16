@@ -51,7 +51,7 @@ class Pool implements PoolInterface
         $item = $this->pool->pop($this->timeout);
 
         if ($item === false) {
-            throw new Exception('Get Item instance timeout, all connection is used!');
+            throw new Exception('Get redis connection instance timeout, pool: ' . $this->getLength());
         }
 
         return $item;
@@ -63,5 +63,15 @@ class Pool implements PoolInterface
     public function getLength() : int
     {
         return $this->pool->length();
+    }
+
+    /**
+     * 清空数据库连接池（释放数据连接）
+     */
+    public function clean()
+    {
+        while ($item = $this->pool->pop($this->timeout)) {
+            $item->close();
+        }
     }
 }

@@ -181,4 +181,13 @@ class MySQL extends Layer
     {
         return $this->master($sql, $params, $timeout);
     }
+
+    /**
+     * 释放数据连接
+     */
+    public function clean()
+    {
+        $this->masterPool->clean();
+        $this->slavePool->clean();
+    }
 }

@@ -182,4 +182,13 @@ class Redis extends Layer
     {
         $this->slavePool->put($item);
     }
+
+    /**
+     * 释放数据连接
+     */
+    public function clean()
+    {
+        $this->masterPool->clean();
+        $this->slavePool->clean();
+    }
 }
