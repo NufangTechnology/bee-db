@@ -78,6 +78,7 @@ class Item implements ItemInterface
         }
 
         // 发送SQL预处理请求
+        /** @var MySQL\Statement $stmt */
         $stmt = $this->resource->prepare($sql, $timeout);
 
         // 查询结果为false
@@ -86,11 +87,9 @@ class Item implements ItemInterface
             // 短线重连
             if ($this->resource->errno == 2006) {
                 $this->connect();
+                // 发送SQL预处理请求
+                $stmt = $this->resource->prepare($sql, $timeout);
             }
-
-            // 发送SQL预处理请求
-            /** @var MySQL\Statement $stmt */
-            $stmt = $this->resource->prepare($sql, $timeout);
 
             // 重连失败
             if ($stmt == false) {

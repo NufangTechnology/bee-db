@@ -91,18 +91,26 @@ class MySQL extends Layer
      * @param array $params
      * @param float $timeout
      * @return array
-     * @throws MySQL\Exception
+     * @throws \Exception
      */
     public function master(string $sql, array $params = [], float $timeout = 0)
     {
         // 取一个连接进行业务操作
-        $item   = $this->masterPool->get();
-        // 执行数据库业务
-        $result = $this->send($sql, $params, $item, $timeout);
-        // 业务处理结束，连接放回连接池
-        $this->masterPool->put($item);
+        $item = $this->masterPool->get();
 
-        return $result;
+        try {
+            // 执行数据库业务
+            $result = $this->send($sql, $params, $item, $timeout);
+            // 业务处理结束，连接放回连接池
+            $this->masterPool->put($item);
+
+            return $result;
+        } catch (\Exception $e) {
+            // 业务处理结束，连接放回连接池(防止连接池连接丢失)
+            $this->masterPool->put($item);
+
+            throw $e;
+        }
     }
 
     /**
@@ -112,18 +120,26 @@ class MySQL extends Layer
      * @param array $params
      * @param float $timeout
      * @return array
-     * @throws MySQL\Exception
+     * @throws \Exception
      */
     public function slave(string $sql, array $params = [], float $timeout = 0)
     {
         // 取一个连接进行业务操作
         $item   = $this->slavePool->get();
-        // 执行数据库业务
-        $result = $this->send($sql, $params, $item, $timeout);
-        // 业务处理结束，连接放回连接池
-        $this->slavePool->put($item);
 
-        return $result;
+        try {
+            // 执行数据库业务
+            $result = $this->send($sql, $params, $item, $timeout);
+            // 业务处理结束，连接放回连接池
+            $this->slavePool->put($item);
+
+            return $result;
+        } catch (\Exception $e) {
+            // 业务处理结束，连接放回连接池(防止连接池连接丢失)
+            $this->slavePool->put($item);
+
+            throw $e;
+        }
     }
 
     /**
@@ -133,7 +149,7 @@ class MySQL extends Layer
      * @param array $params
      * @param float $timeout
      * @return array
-     * @throws MySQL\Exception
+     * @throws \Exception
      */
     public function insert(string $sql, array $params = [], float $timeout = 0)
     {
@@ -147,7 +163,7 @@ class MySQL extends Layer
      * @param array $params
      * @param float $timeout
      * @return array
-     * @throws MySQL\Exception
+     * @throws \Exception
      */
     public function select(string $sql, array $params = [], float $timeout = 0)
     {
@@ -161,7 +177,7 @@ class MySQL extends Layer
      * @param array $params
      * @param float $timeout
      * @return array
-     * @throws MySQL\Exception
+     * @throws \Exception
      */
     public function update(string $sql, array $params = [], float $timeout = 0)
     {
@@ -175,7 +191,7 @@ class MySQL extends Layer
      * @param array $params
      * @param float $timeout
      * @return array
-     * @throws MySQL\Exception
+     * @throws \Exception
      */
     public function delete(string $sql, array $params = [], float $timeout = 0)
     {
