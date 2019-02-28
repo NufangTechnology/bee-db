@@ -3,9 +3,10 @@
     "description": "Bee框架数据库组件",
     "type": "library",
     "require": {
-        "bee-framework/util": "^2.0",
+        "php": ">=7.1",
         "ext-redis": "*",
-        "ext-swoole": "*"
+        "ext-swoole": "*",
+        "bee-framework/util": "^2.0"
     },
     "require-dev": {
         "swoft/swoole-ide-helper": "^4.2"
