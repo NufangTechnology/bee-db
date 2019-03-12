@@ -86,7 +86,10 @@ class Redis extends Layer
 
         //检查服务器连接情况
         try {
-            $source->ping();
+            $result = $source->get($item::CONNECT_TEST_KEY);
+            if ($result == false) {
+                $item->connect();
+            }
         } catch (\Exception $e) {
             $item->connect();
         }
@@ -123,7 +126,10 @@ class Redis extends Layer
 
         //检查服务器连接情况
         try {
-            $source->ping();
+            $result = $source->get($item::CONNECT_TEST_KEY);
+            if ($result == false) {
+                $item->connect();
+            }
         } catch (\Exception $e) {
             $item->connect();
         }

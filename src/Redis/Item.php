@@ -36,6 +36,11 @@ class Item implements ItemInterface
     protected $resource;
 
     /**
+     * 连接测试键
+     */
+    const CONNECT_TEST_KEY = 'connect-test-key';
+
+    /**
      * Item
      *
      * @param array $config
@@ -70,6 +75,9 @@ class Item implements ItemInterface
         if ($this->auth) {
             $this->resource->auth($this->auth);
         }
+
+        // 创建连接检测数据
+        $this->resource->set(self::CONNECT_TEST_KEY, 'o');
 
         return true;
     }
